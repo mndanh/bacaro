@@ -5,42 +5,45 @@ require("dotenv").config();
 
 const Model = User; 
 
-  async function verifyUser(req){
-    const cookie = req.cookies["auth-cookie"]
-    if( !cookie ) return false 
+async function verifyUser(req) {
+  //console.log(req.cookies);
 
-    const isVerified = jwt.verify(cookie, process.env.JWT_SECRET)
-    if( !isVerified ) return false 
+  let cookie;
+  try {
+    cookie = await req.cookies["auth-cookie"];
+  } catch (err) {
+    console.log(err);
+  }
 
-    const user = await Model.findOne({ _id: isVerified.id })
-    if( !user ) return false 
+  console.log("cookie", cookie);
+  if (!cookie) return false;
 
-    return user
+  try {
+    const isVerified = jwt.verify(cookie, process.env.JWT_SECRET);
+
+    if (!isVerified) return false;
+
+    const user = await Model.findOne({ _id: isVerified.id });
+    return user || false;
+  } catch (err) {
+    console.error("Error verifying user:", err);
+    return false;
+  }
 }
 
-
-async function authenticate(data){
-  let user 
-
+async function authenticate(data) {
   try {
-    user = await Model.findOne({ email: data.email })
-  } catch(err) {
-    console.log(err)
-    throw new Error(err)
+    const user = await Model.findOne({ email: data.email });
+    if (!user) throw new Error("No user found");
+
+    const userIsOk = await bcrypt.compare(data.password, user.password);
+    if (!userIsOk) throw new Error("Could not login");
+
+    return user;
+  } catch (err) {
+    console.error("Error authenticating user:", err);
+    throw new Error(err.message);
   }
-
-  if(!user) throw new Error("No user found")
-
-  let userIsOk = false
-  try {
-    userIsOk = await bcrypt.compare( data.password, user.password )
-  } catch(err){
-    console.log(err)
-    throw new Error(err)
-  }
-
-  if(!userIsOk) throw new Error("Could not login")
-  return user;
 }
 
 
