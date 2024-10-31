@@ -39,25 +39,29 @@ export default function Auth({usage="signup"}){
     setUserData({...userData, email: appCtx.user.email || "" })
   },[appCtx])
 
-
   return (
     <div>
       <form onSubmit={handleFormSubmit}>
         <div>
-          <h2>{ usage === "signup" ? "Signup" : "Login" }</h2>
+          <h2>{usage === "signup" ? "Signup" : "Login"}</h2>
           <div>
             <div>
               <label className="d-block">Email Address</label>
               <input type="text" name="email" value={userData.email} onChange={handleInputChange} />
             </div>
-            <div>
-              <label className="d-block">First Name</label>
-              <input type="text" name="fname" value={userData.fname} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label className="d-block">Last Name</label>
-              <input type="text" name="lname" value={userData.lname} onChange={handleInputChange} />
-            </div>
+
+            {usage === "signup" && (
+              <>
+                <div>
+                  <label className="d-block">First Name</label>
+                  <input type="text" name="fname" value={userData.fname} onChange={handleInputChange} />
+                </div>
+                <div>
+                  <label className="d-block">Last Name</label>
+                  <input type="text" name="lname" value={userData.lname} onChange={handleInputChange} />
+                </div>
+              </>
+            )}
 
             <div>
               <label className="d-block">Password</label>
@@ -69,6 +73,5 @@ export default function Auth({usage="signup"}){
         </div>
       </form>
     </div>
-  )
-
+  );
 }
